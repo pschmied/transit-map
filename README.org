@@ -1,0 +1,35 @@
+* An attempt to create the interactive transit map of my dreams
+
+The idea here is simple: fit more, and more useful information on an
+transit map. Knowing where I am and where I want to go should be
+enough info to feed the computer. In return, it should show me nearby
+routes and stops, together with real-time arrival info and route
+headways. And a pony.
+
+** Usage
+
+LightTable - open ~core.clj~ and press ~Ctrl+Shift+Enter~ to evaluate the file.
+
+Emacs - run cider, open ~core.clj~ and press ~C-c C-k~ to evaluate the file.
+
+REPL - run ~(require 'transit-map.core)~.
+
+** Building
+This should work more or less out-of-the-box with Leiningen. There is
+one exception: unfolding maps. Tip of the hat to [[https://github.com/jackrusher/citibikes][jackrusher]] for the
+hint to install this via a leiningen local repo. Download the
+unfolding maps, extract the zip, install the [[https://github.com/kumarshantanu/lein-localrepo][lein-localrepo plugin]] and
+then do something like this:
+
+#+BEGIN_SRC 
+$ lein localrepo install /path/to/library/Unfolding.jar unfolding 0.9.6
+#+END_SRC
+
+After this, you can add it to the dependencies list in ~project.clj~.
+
+** License
+
+Copyright © 2015 Peter Schmiedeskamp
+
+Distributed under the Eclipse Public License either version 1.0 or (at
+your option) any later version.
