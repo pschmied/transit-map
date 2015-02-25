@@ -7,4 +7,6 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/data.json "0.2.5"]
                  [quil "2.2.5"]
-                 [unfolding "0.9.6"]])
+                 [unfolding "0.9.6"]    ; Installed in local repo
+                 [json4proc "0.9.6"]    ; Ditto; shipped with unfolding
+                 [log4j "1.2.15"]])

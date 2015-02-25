@@ -23,6 +23,7 @@ then do something like this:
 
 #+BEGIN_SRC 
 $ lein localrepo install /path/to/library/Unfolding.jar unfolding 0.9.6
+$ lein localrepo install /path/to/library/json4processing.jar json4proc 0.9.6
 #+END_SRC
 
 After this, you can add it to the dependencies list in ~project.clj~.
