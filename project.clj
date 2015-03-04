@@ -9,4 +9,8 @@
                  [quil "2.2.5"]
                  [unfolding "0.9.6"]    ; Installed in local repo
                  [json4proc "0.9.6"]    ; Ditto; shipped with unfolding
-                 [log4j "1.2.15"]])
+                 [log4j "1.2.15"]
+                 [yesql "0.4.0"]
+                 [org.postgresql/postgresql "9.2-1002-jdbc4"]]
+  :aot [transit-map.core]
+  :main transit-map.core)
