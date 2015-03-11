@@ -7,15 +7,35 @@
            (de.fhpotsdam.unfolding.utils MapUtils))
   (:require [quil.core :as q]
             [quil.middleware :as m]
-            [yesql.core :as sql :refer [defqueries]])
+            [yesql.core :as sql :refer [defqueries]]
+            [clojure.data.json :as json]
+            [geo.spatial :as spatial])
   (:gen-class))
+
 (sql/defqueries "transit_map/queries.sql")
 
 (def db {:classname "org.postgresql.Driver"
          :subprotocol "postgresql"
          :subname "//localhost/transit"})
 
-(def myroute (rt-json db))
+(def myroutes
+  (let [recs (apply (fn [x] (json/read-str (x :geom)))
+                    (routes-connecting-1000m db))]
+    (recs "coordinates")))
+
+(defn pairs [xs] (map vector xs (rest xs)))
+
+(defn coord-to-xy [bgmap coord]
+  (let [lon (first coord)
+        lat (last coord)]
+    (let [position (.getScreenPosition (SimplePointMarker. (Location. lat lon)) bgmap)]
+      [(.x position) (.y position)])))
+
+(defn route-to-lines [bgmap route]
+  (pairs (map (fn [x] (coord-to-xy bgmap x)) route)))
+
+(defn routes-to-lines [bgmap routes]
+  (apply concat (map (fn [x] (route-to-lines bgmap x)) routes)))
 
 (def odsize 30)                         ; Size of our OD symbol circle
 
@@ -30,27 +50,29 @@
   (let [rad (Math/abs (- (:odrad state) odsize))]
     (q/ellipse (:dx state) (:dy state) rad rad)))
 
+(defn draw-routes [state]
+  (doseq [l (state :lines)]
+    (q/stroke 0 200 0)
+    (apply q/line (flatten l))))
+
 (defn setup []
   (q/frame-rate 30)
   (q/smooth)
-  ;; setup function returns initial state.
-  ;; State is one big happy hashmap
+  (q/stroke-weight 2)
   (def bgmap
     (doto (UnfoldingMap.
            (quil.applet/current-applet)
            (de.fhpotsdam.unfolding.providers.StamenMapProvider$TonerBackground.))
-      (.setZoomRange 10 13)
-      (.zoomToLevel 13)
-      (.draw)))
-  (def myfeat (GeoJSONReader/loadDataFromJSON
-               (quil.applet/current-applet)
-               (.toString (:row_to_json (first myroute)))))
-  (def mymark (MapUtils/createSimpleMarkers myfeat))
-  (q/stroke-weight 2)
-  {:zoomlevel 10
+      (.setZoomRange 13 14)
+      (.zoomToLevel 13)))
+  ;; setup function returns initial state.
+  ;; State is one big happy hashmap
+  {:bgmap bgmap
    :lat 47.628 :lon -122.33
    :ox -100 :oy -100 :odrad odsize
-   :dx -100 :dy -100})
+   :dx -100 :dy -100
+   :lines (routes-to-lines bgmap myroutes)
+   })
 
 (defn update-state [state]
   (-> state
@@ -63,15 +85,18 @@
     ))
 
 (defn draw-state [state]
-  (.panTo bgmap (Location. (:lat state) (:lon state)))
-  (.draw bgmap)
-  ;(.addMarkers bgmap mymark)
-  (draw-o state)
-  (draw-d state)
-  )
+  (let [bgmap (state :bgmap)
+        lat (state :lat)
+        lon (state :lon)]
+    (.panTo bgmap (Location. lat lon))
+    (.draw bgmap)
+    (draw-o state)
+    (draw-d state)
+    (draw-routes state)
+    ))
 
-;; (defn -main [& args]
-;;   (q/sketch
+  ;; (defn -main [& args]
+  ;;   (q/sketch
 (q/defsketch transit-map
   :title "Transit map"
   :size [600 725]

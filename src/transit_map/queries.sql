@@ -1,13 +1,11 @@
 -- name: routes-connecting-1000m
 -- Returns geojson of routes intersecting origin and destination 1000m buffer
--- SELECT geom, route_id, route_short_name, route_long_name, route_desc,
---        route_type, route_url
--- FROM routes
--- WHERE route_short_name='71'
--- LIMIT 1;
+SELECT ST_AsGeoJSON(geom) geom, route_id, route_short_name, route_long_name, route_desc,
+       route_type, route_url
+FROM routes
+WHERE route_short_name='16'
+LIMIT 1;
 
-\pset tuples_only
-\pset footer off
 
 -- name: rt-json
 SELECT row_to_json(fc)
