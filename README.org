@@ -14,19 +14,59 @@ Emacs - run cider, open ~core.clj~ and press ~C-c C-k~ to evaluate the file.
 
 REPL - run ~(require 'transit-map.core)~.
 
-** Building
+** Software prerequisites
+*** Postgis 'transit' database populated with KC Metro GTFS data
+This app uses PostGIS for the back-end spatial queries. On Posix-ish
+systems like Linux and *BSD, look to your packages / ports
+collections. On Mac OS X, I've typically used the distribution from
+[[http://brew.sh/][Homebrew]], however an easier option (if you do not already have
+Homebrew set up or want it for other purposes) might be the
+[[http://postgresapp.com/][Postgres.app distribution]]; it has PostGIS extensions built-in.
+
+This app assumes a database called transit, and that the connection
+can be made from the local host without authentication by the current
+user of the system. Assuming the current user can create databases,
+the transit db can be initialized as follows:
+
+#+BEGIN_SRC
+$ create_db transit
+$ psql -d transit -c "CREATE EXTENSION postgis;"
+#+END_SRC
+
+Next, you'll need to load the King County Metro GTFS data. This can be
+loaded directly from King County in it's original form via [[https://code.google.com/p/gtfsdb/][gtfsdb]],
+however some of that project's dependencies are a bit out-of-date and
+idiosyncratic to install. I've created a pg_dump of these data, which
+will probably be outdated somewhat soon. Nevertheless this can be
+downloaded from: [[https://db.tt/ihjLVklo]]. You can restore this dump to
+the initialized transit database as follows:
+
+#+BEGIN_SRC
+$ gzcat transit.pgdump.gz | psql transit
+#+END_SRC
+
+*** Java / Clojure / Leiningen
+If you're on Windows or Mac OS X, I highly recommend installing
+Oracle's Java *JDK* rather than the JRE. The JRE on both Windows and
+Mac OS X now include Ask.com crapware. For now, the JDK has been
+spared. Oracle, why must you be so shady?
+
+Once Java is installed, installing Leiningen is a snap and will handle
+the most of the remaining dependencies. See [[http://leiningen.org/]] for
+installation instructions for your platform.
+
+*** Unfolding maps manual dependency
 This should work more or less out-of-the-box with Leiningen. There is
 one exception: unfolding maps. Tip of the hat to [[https://github.com/jackrusher/citibikes][jackrusher]] for the
-hint to install this via a leiningen local repo. Download the
-unfolding maps, extract the zip, install the [[https://github.com/kumarshantanu/lein-localrepo][lein-localrepo plugin]] and
-then do something like this:
+hint to install this via a leiningen local repo. Download [[https://github.com/tillnagel/unfolding/releases/download/v0.9.6/Unfolding_for_processing_0.9.6.zip][unfolding
+maps]], extract the zip, install the [[https://github.com/kumarshantanu/lein-localrepo][lein-localrepo plugin]] (will happen
+automatically via leiningen) and then do something like this:
 
 #+BEGIN_SRC 
 $ lein localrepo install /path/to/library/Unfolding.jar unfolding 0.9.6
 $ lein localrepo install /path/to/library/json4processing.jar json4proc 0.9.6
+$ lein localrepo install /path/to/library/log4j-1.2.15.jar log4j 1.2.15
 #+END_SRC
-
-After this, you can add it to the dependencies list in ~project.clj~.
 
 ** License
 
