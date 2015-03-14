@@ -8,8 +8,7 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [yesql.core :as sql :refer [defqueries]]
-            [clojure.data.json :as json]
-            [geo.spatial :as spatial])
+            [clojure.data.json :as json])
   (:gen-class))
 
 (sql/defqueries "transit_map/queries.sql")
@@ -102,9 +101,10 @@
   :size [600 725]
   ;; setup function called only once, during sketch initialization.
   :setup setup
-  :renderer :opengl
-  :features [;:exit-on-close
-             :keep-on-top]
+  :renderer :java2d
+  :features [;;:exit-on-close
+                       ;;:keep-on-top
+                      ]
   ;; update-state is called on each iteration before draw-state.
   :update update-state
   :draw draw-state
